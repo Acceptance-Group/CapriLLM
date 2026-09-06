@@ -1,0 +1,37 @@
+model:
+  vocab_size: 100000
+  d_model: 12288
+  num_layers: 120
+  num_heads: 96
+  num_kv_heads: 8
+  max_seq_len: 32768
+  intermediate_size: 49152
+  norm_eps: 1.0e-5
+  rope_theta: 500000.0
+  tie_embeddings: false
+  attention_backend: flash_attention_2
+  use_moe: true
+  num_experts: 64
+  top_k_experts: 6
+
+train:
+  dataset_name: "your-large-instruct-dataset"
+  format_template: "<system|>\nYou are a helpful assistant.\n<end|>\n<user|>\n{instruction}\n{input}\n<end|>\n<assistant|>\n{output}\n<end|>"
+  tokenizer_path: "tokenizer_100k.json"
+  output_dir: "outputs/x64_1000b"
+  batch_size: 1
+  gradient_accumulation_steps: 256
+  num_epochs: 1
+  max_steps: 100000
+  learning_rate: 5.0e-5
+  weight_decay: 0.1
+  warmup_steps: 5000
+  max_grad_norm: 1.0
+  precision: bf16
+  distributed_strategy: fsdp
+  gradient_checkpointing: true
+  eval_interval: 500
+  save_interval: 2000
+  seed: 42
+  num_workers: 8
+  num_threads: 8

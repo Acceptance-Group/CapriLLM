@@ -1,0 +1,34 @@
+model:
+  vocab_size: 32000
+  d_model: 2048
+  num_layers: 22
+  num_heads: 16
+  num_kv_heads: 4
+  max_seq_len: 2048
+  intermediate_size: 5504
+  norm_eps: 1.0e-5
+  rope_theta: 10000.0
+  tie_embeddings: false
+  attention_backend: flash_attention_2
+
+train:
+  dataset_name: "tatsu-lab/alpaca"
+  format_template: "<system|>\nYou are a helpful assistant.\n<end|>\n<user|>\n{instruction}\n{input}\n<end|>\n<assistant|>\n{output}\n<end|>"
+  tokenizer_path: "tokenizer.json"
+  output_dir: "outputs/x64_1b"
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  num_epochs: 1
+  max_steps: 10000
+  learning_rate: 3.0e-4
+  weight_decay: 0.1
+  warmup_steps: 500
+  max_grad_norm: 1.0
+  precision: bf16
+  distributed_strategy: single_gpu
+  gradient_checkpointing: false
+  eval_interval: 100
+  save_interval: 1000
+  seed: 42
+  num_workers: 4
+  num_threads: 8
