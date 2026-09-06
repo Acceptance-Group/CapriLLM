@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import torch
@@ -69,6 +70,8 @@ class Trainer:
             self.model.gradient_checkpointing = True
 
         self.model.train()
+        total_steps = self.train_config.max_steps or len(dataloader) * self.train_config.num_epochs
+        train_start = time.time()
         for epoch in range(self.train_config.num_epochs):
             if sampler is not None:
                 sampler.set_epoch(epoch)
@@ -76,7 +79,10 @@ class Trainer:
                 self.global_step += 1
                 loss = self._train_step(batch)
                 if is_main_process() and self.global_step % self.train_config.eval_interval == 0:
-                    print(f"step {self.global_step}, loss {loss:.4f}")
+                    elapsed = time.time() - train_start
+                    speed = self.global_step / elapsed if elapsed > 0 else 0.0
+                    lr = self.scheduler.get_last_lr()[0]
+                    print(f"step {self.global_step}/{total_steps}, loss {loss:.4f}, lr {lr:.2e}, {speed:.2f} steps/s")
                 if is_main_process() and self.global_step % self.train_config.save_interval == 0:
                     self._save_checkpoint()
                 if self.train_config.max_steps and self.global_step >= self.train_config.max_steps:

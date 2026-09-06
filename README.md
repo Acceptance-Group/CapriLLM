@@ -74,11 +74,14 @@ python main.py train --config configs/X64-1b.yaml \
   --override train.max_steps=5000 train.learning_rate=2.0e-4
 ```
 
-On Apple Silicon, cap MPS memory to keep the system stable:
+On Apple Silicon, you can cap MPS memory usage by setting **both** watermarks (low must stay below high, and both must satisfy the driver's limits):
 
 ```bash
-PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 python main.py train --config configs/ARM-0.5b.yaml
+PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 PYTORCH_MPS_LOW_WATERMARK_RATIO=0.6 \
+  python main.py train --config configs/ARM-0.5b.yaml
 ```
+
+If PyTorch rejects the ratios, just run without them — `num_threads` in the config already keeps the machine responsive.
 
 ### 3. Generate with system prompt and tools
 
