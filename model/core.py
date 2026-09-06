@@ -95,11 +95,11 @@ class Transformer(nn.Module):
         ]
         output_ids = input_ids
         logits = self(input_ids, kv_caches)
-        stop_token_ids = generation_config.stop_token_ids
+        stop_ids = torch.tensor(generation_config.stop_token_ids, device=input_ids.device, dtype=input_ids.dtype)
         for _ in range(generation_config.max_new_tokens):
             next_id = self._sample(logits[:, -1, :], output_ids, generation_config)
             output_ids = torch.cat([output_ids, next_id], dim=-1)
-            if stop_token_ids and (next_id == stop_token_ids).any():
+            if len(stop_ids) and (next_id == stop_ids).any():
                 break
             logits = self(next_id, kv_caches)
         return output_ids
