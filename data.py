@@ -73,7 +73,7 @@ class ChatDataset(Dataset):
     def __getitem__(self, idx):
         text = self._to_text(self.raw_data[idx])
         input_ids = self.tokenizer.encode(text, add_bos=True)
-        input_ids = input_ids[: self.max_seq_len]
+        input_ids = input_ids[: self.max_seq_len - 1]
         input_ids.append(self.tokenizer.vocabulary.token_id("<eos>"))
         pad_id = self.tokenizer.vocabulary.token_id("<pad>")
         input_ids = input_ids + [pad_id] * (self.max_seq_len - len(input_ids))
