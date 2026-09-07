@@ -29,7 +29,7 @@ def main(args):
     if args.tools:
         tools = json.loads(Path(args.tools).read_text(encoding="utf-8"))
 
-    prompt = format_messages(messages, tools)
+    prompt = format_messages(messages, tools) + "\n<assistant|>\n"
     stop_token_ids = [
         tokenizer.vocabulary.token_id("<end|>"),
         tokenizer.vocabulary.token_id("<eos>"),
@@ -44,9 +44,10 @@ def main(args):
     )
 
     input_ids = torch.tensor([tokenizer.encode(prompt, add_bos=True)], device=next(model.parameters()).device)
+    input_len = input_ids.shape[1]
     output_ids = model.generate(input_ids, generation_config)
-    raw_output = tokenizer.decode(output_ids[0].tolist())
-    assistant_text = raw_output.split("<assistant|>")[-1].split("<end|>")[0].strip() if "<assistant|>" in raw_output else raw_output
+    text = tokenizer.decode(output_ids[0, input_len:].tolist())
+    assistant_text = text.split("<end|>")[0].split("<eos>")[0].strip()
 
     function_call = parse_function_call(assistant_text)
     if function_call:

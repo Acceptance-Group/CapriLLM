@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from typing import List, Literal, Optional
 
 ROLE_TOKENS = {
-    "system": "<|system|>",
-    "user": "<|user|>",
-    "assistant": "<|assistant|>",
-    "tool": "<|tool|>",
+    "system": "<system|>",
+    "user": "<user|>",
+    "assistant": "<assistant|>",
+    "tool": "<tool|>",
 }
 
 SPECIAL_TOKENS = {

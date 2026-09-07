@@ -75,12 +75,30 @@ class BPETokenizer:
             tokens = result
         return tokens
 
+    def _encode_plain(self, chunk: str, unk_id: int) -> List[int]:
+        if not chunk:
+            return []
+        ids = []
+        for match in self.word_pattern.finditer(chunk):
+            word_tokens = self._merge_word(list(match.group()) + ["</w>"])
+            ids.extend(self.vocabulary.token_to_id.get(token, unk_id) for token in word_tokens)
+        return ids
+
     def encode(self, text: str, add_bos: bool = False, add_eos: bool = False) -> List[int]:
         ids = [self.vocabulary.token_id("<bos>")] if add_bos else []
         unk_id = self.vocabulary.token_id("<unk>")
-        for match in self.word_pattern.finditer(text):
-            word_tokens = self._merge_word(list(match.group()) + ["</w>"])
-            ids.extend(self.vocabulary.token_to_id.get(token, unk_id) for token in word_tokens)
+
+        specials = sorted(self.vocabulary.special_tokens.keys(), key=len, reverse=True)
+        special_pattern = re.compile("|".join(re.escape(token) for token in specials)) if specials else None
+
+        position = 0
+        if special_pattern is not None:
+            for match in special_pattern.finditer(text):
+                ids.extend(self._encode_plain(text[position : match.start()], unk_id))
+                ids.append(self.vocabulary.special_tokens[match.group()])
+                position = match.end()
+        ids.extend(self._encode_plain(text[position:], unk_id))
+
         if add_eos:
             ids.append(self.vocabulary.token_id("<eos>"))
         return ids

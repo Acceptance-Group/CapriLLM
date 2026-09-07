@@ -79,11 +79,10 @@ class GroupedQueryAttention(nn.Module):
                 from flash_attn import flash_attn_func
 
                 out = flash_attn_func(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), causal=True)
-                out = out.transpose(1, 2)
             except ImportError:
-                out = self._eager_attention(q, k, v, offset)
+                out = self._eager_attention(q, k, v, offset).transpose(1, 2)
         else:
-            out = self._eager_attention(q, k, v, offset)
+            out = self._eager_attention(q, k, v, offset).transpose(1, 2)
 
         out = out.reshape(batch_size, seq_len, -1)
         return self.o_proj(out)
