@@ -33,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate_parser.add_argument("--top-p", type=float, default=0.9)
     generate_parser.add_argument("--top-k", type=int, default=None)
     generate_parser.add_argument("--repetition-penalty", type=float, default=1.1)
+    generate_parser.add_argument("--think", action="store_true", help="Force reasoning with <think|>")
 
     return parser
 

@@ -22,6 +22,14 @@ def format_messages(messages: List[Dict[str, str]], tools: Optional[List[Dict[st
     return "\n".join(parts)
 
 
+def split_reasoning(text: str):
+    if "</think|>" in text:
+        raw_reasoning, answer = text.split("</think|>", 1)
+        reasoning = raw_reasoning.replace("<think|>", "").strip()
+        return reasoning, answer.strip()
+    return None, text
+
+
 def parse_function_call(text: str) -> Optional[Dict[str, Any]]:
     if "<call|>" not in text or "<end|>" not in text:
         return None

@@ -101,6 +101,34 @@ If the model decides to call a tool, it emits `<call|>{"name": ..., "arguments":
 {"function_call": {"name": "get_weather", "arguments": {"city": "Paris"}}}
 ```
 
+### 4. Reasoning mode (R1-style distillation)
+
+Every size has a `-reasoning` config trained on `simplescaling/s1K-1.1` (R1 thinking traces). The model learns to reason inside `<think|>...</think|>` before answering. Requires a tokenizer trained with the reasoning special tokens:
+
+```bash
+python main.py train --config configs/ARM-0.5b-reasoning.yaml
+```
+
+Generate with visible reasoning, or force it with `--think`:
+
+```bash
+python main.py generate \
+  --checkpoint outputs/arm_0.5b_reasoning/checkpoint_4000.pt \
+  --tokenizer tokenizer.json \
+  --system "You are a helpful assistant. Think step by step." \
+  --prompt "What is 17 * 23?" \
+  --think --temperature 0.3
+```
+
+Output separates the chain of thought from the final answer:
+
+```
+--- Reason ---
+17 * 23 = 17 * 20 + 17 * 3 = 340 + 51
+--- Answer ---
+391
+```
+
 ---
 
 ## 🗂️ Configuration Profiles
@@ -113,6 +141,7 @@ If the model decides to call a tool, it emits `<call|>{"name": ..., "arguments":
 | `X64-7b` | Multi-GPU node | FSDP | bf16, gradient checkpointing |
 | `X64-70b` | Multi-node cluster | FSDP | 64K vocab, long context |
 | `X64-1000b` | Industrial cluster | FSDP | MoE (64 experts, top-6), 100K vocab |
+| `*-reasoning` (all sizes) | Same as base | Same as base | s1K-1.1 R1 traces, `<think|>` format, longer context |
 
 ---
 

@@ -20,6 +20,8 @@ SPECIAL_TOKENS = {
     "<tools|>": "<tools|>",
     "<call|>": "<call|>",
     "<end|>": "<end|>",
+    "<think|>": "<think|>",
+    "</think|>": "</think|>",
 }
 
 

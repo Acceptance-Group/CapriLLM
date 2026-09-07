@@ -5,7 +5,7 @@ from typing import Optional
 import torch
 
 from config import GenerationConfig, ModelConfig
-from data import format_messages, parse_function_call
+from data import format_messages, parse_function_call, split_reasoning
 from model.core import Transformer
 from tokenizer.core import BPETokenizer
 from utils import get_device
@@ -29,7 +29,8 @@ def main(args):
     if args.tools:
         tools = json.loads(Path(args.tools).read_text(encoding="utf-8"))
 
-    prompt = format_messages(messages, tools) + "\n<assistant|>\n"
+    think_prefix = "<think|>\n" if getattr(args, "think", False) else ""
+    prompt = format_messages(messages, tools) + f"\n<assistant|>\n{think_prefix}"
     stop_token_ids = [
         tokenizer.vocabulary.token_id("<end|>"),
         tokenizer.vocabulary.token_id("<eos>"),
@@ -49,8 +50,11 @@ def main(args):
     text = tokenizer.decode(output_ids[0, input_len:].tolist())
     assistant_text = text.split("<end|>")[0].split("<eos>")[0].strip()
 
-    function_call = parse_function_call(assistant_text)
+    reasoning, answer = split_reasoning(assistant_text)
+    function_call = parse_function_call(answer)
     if function_call:
         print(json.dumps({"function_call": function_call}, ensure_ascii=False, indent=2))
-    else:
-        print(assistant_text)
+        return
+    if reasoning:
+        print(f"--- Reasoning ---\n{reasoning}\n--- Answer ---")
+    print(answer)
