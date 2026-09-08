@@ -88,13 +88,14 @@ class ChatDataset(Dataset):
         return {"input_ids": input_ids, "labels": list(input_ids)}
 
 
-def build_dataloader(dataset: Dataset, batch_size: int, num_workers: int = 0, sampler=None) -> DataLoader:
-    def collate_fn(batch):
-        return {
-            "input_ids": torch.tensor([item["input_ids"] for item in batch], dtype=torch.long),
-            "labels": torch.tensor([item["labels"] for item in batch], dtype=torch.long),
-        }
+def collate_fn(batch):
+    return {
+        "input_ids": torch.tensor([item["input_ids"] for item in batch], dtype=torch.long),
+        "labels": torch.tensor([item["labels"] for item in batch], dtype=torch.long),
+    }
 
+
+def build_dataloader(dataset: Dataset, batch_size: int, num_workers: int = 0, sampler=None) -> DataLoader:
     return DataLoader(
         dataset,
         batch_size=batch_size,
