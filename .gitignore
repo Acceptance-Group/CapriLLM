@@ -182,3 +182,4 @@ cython_debug/
 /data
 tokenizer.json
 /outputs
+dump_alpaca.py
