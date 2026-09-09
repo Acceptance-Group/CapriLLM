@@ -48,6 +48,7 @@ class TrainConfig:
     dataset_name: Optional[str] = None
     data_path: Optional[str] = None
     format_template: Optional[str] = None
+    init_from: Optional[str] = None
     tokenizer_path: str = "tokenizer.json"
     output_dir: str = "outputs"
     batch_size: int = 1

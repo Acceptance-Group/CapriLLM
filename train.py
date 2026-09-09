@@ -27,6 +27,10 @@ class Trainer:
         set_seed(train_config.seed)
 
         self.model = Transformer(model_config).to(self.device)
+        if train_config.init_from:
+            checkpoint = torch.load(train_config.init_from, map_location="cpu", weights_only=False)
+            self.model.load_state_dict(checkpoint["model"])
+            print(f"Initialized weights from {train_config.init_from}")
         self.optimizer = AdamW(
             self.model.parameters(),
             lr=train_config.learning_rate,
@@ -128,10 +132,10 @@ class Trainer:
 
         return loss.item()
 
-    def _save_checkpoint(self):
+    def _save_checkpoint(self, name=None):
         output_dir = Path(self.train_config.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        path = output_dir / f"checkpoint_{self.global_step}.pt"
+        path = output_dir / (name or f"checkpoint_{self.global_step}.pt")
         state = {
             "model": self.model.state_dict(),
             "model_config": vars(self.model_config),
@@ -143,6 +147,6 @@ class Trainer:
         print(f"Saved checkpoint to {path}")
 
     def _finish(self):
-        self._save_checkpoint()
+        self._save_checkpoint("checkpoint_final.pt")
         if dist_initialized():
             cleanup_distributed()
